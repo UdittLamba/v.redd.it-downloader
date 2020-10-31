@@ -102,3 +102,10 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Idea IDE folder
+.idea/
+
+# Do not like uploading lock files.
+package-lock.json
+*.mp4
