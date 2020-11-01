@@ -1,9 +1,7 @@
 'use strict'
 const fs = require('fs')
 const axios = require('axios')
-const { toSnakeCase } = require('./utils')
-const Ffmpeg = require('ffmpeg')
-
+const { toSnakeCase, mergeAudioVideo } = require('./utils')
 const { sanitizeUrlFromReddit } = require('./UrlValidator.js')
 
 /**
@@ -27,28 +25,28 @@ module.exports.downloadVredditVideo =
     audio = true
   ) => {
     try {
+      let redditVideo, redditAudio
       if (video === false && audio === false) {
         throw new Error('variables audio and video cannot be both false')
       }
       const sanitizedUrl = await sanitizeUrlFromReddit(url)
       if (video) {
         // eslint-disable-next-line no-unused-vars
-        const redditVideo = await captureVredditAudioVideo(
+        redditVideo = captureVredditAudioVideo(
           sanitizedUrl.videoUrl, toSnakeCase(sanitizedUrl.title) + '.mp4',
           outputPath)
       }
       if (audio) {
-        const redditAudioMp4 = await captureVredditAudioVideo(
-          sanitizedUrl.audioUrl, toSnakeCase(sanitizedUrl.title) + '_audio' + '.mp4',
+        redditAudio = captureVredditAudioVideo(
+          sanitizedUrl.audioUrl, toSnakeCase(sanitizedUrl.title) + '_audio' + '.mp3',
           outputPath)
-        // Ffmpeg(redditAudioMp4, (err, audio) => {
-        //   if (!err) {
-        //     // eslint-disable-next-line no-unused-vars
-        //     console.log(audio.setVideoCodec('mp3'))
-        //   } else {
-        //     console.log('Error: ' + err)
-        //   }
-        // })
+        // console.log(redditAudio)
+      }
+      if (video === true && audio === true) {
+        const values = await Promise.all([redditVideo, redditAudio])
+        await mergeAudioVideo(values[0], values[1])
+        // const value = await mergeAudioVideo(redditVideo, redditAudio)
+        // console.log(value)
       }
     } catch (err) {
       console.log(err)
@@ -65,24 +63,32 @@ module.exports.downloadVredditVideo =
  * @return {Promise<string>}
  */
 const captureVredditAudioVideo =
-  async (
+  (
     url, outputFileName, outputPath, method = 'get', responseType = 'stream'
   ) => {
-    const buffArray = []
-    const response = await axios({
-      method: method,
-      url: url,
-      responseType: responseType
-    })
-    await response.data.on('data', (chunk) => {
-      buffArray.push(chunk)
-    })
-
-    await response.data.on('end', () => {
-      const buff = Buffer.concat(buffArray)
-      fs.writeFile(outputPath + '/' + outputFileName, buff, (dt) => {
-        console.log('File created')
+    return new Promise((resolve, reject) => {
+      const buffArray = []
+      axios({
+        method: method,
+        url: url,
+        responseType: responseType
+      }).then((response) => {
+        // console.log(response)
+        response.data.on('data', (chunk) => {
+          buffArray.push(chunk)
+        })
+        response.data.on('end', () => {
+          const buff = Buffer.concat(buffArray)
+          fs.writeFile(outputPath + '/' + outputFileName, buff, (dt) => {
+            if (dt === null) {
+              console.log('File created at: ' + outputPath + '/' + outputFileName)
+              resolve(outputPath + '/' + outputFileName)
+            } else {
+              reject(dt)
+              console.log('Error while writing file :' + outputFileName)
+            }
+          })
+        })
       })
     })
-    return outputPath + '/' + outputFileName
   }
