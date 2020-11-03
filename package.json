@@ -2,7 +2,7 @@
   "name": "dwnldr",
   "version": "0.0.1",
   "description": "An all encompassing media downloading npm module.",
-  "main": "main.js",
+  "main": "index.js",
   "scripts": {
     "test": "standard"
   },

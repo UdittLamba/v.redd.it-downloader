@@ -1,19 +1,18 @@
 'use strict'
 const axios = require('axios')
+const { isUrlAccessible } = require('./utils')
 
 const validUrl = [
   'old.reddit.com',
-  'www.reddit.com',
-  'v.redd.it',
-  'vcf.redd.it'
+  'www.reddit.com'
 ]
 
 /**
  *
  * @param url
- * @return {Promise<boolean>}
+ * @return {boolean}
  */
-const checkRedditUrl = async (url) => {
+const checkRedditUrl = (url) => {
   for (const pattern of validUrl) {
     if (url.includes(pattern)) {
       return true
@@ -25,10 +24,11 @@ const checkRedditUrl = async (url) => {
 /**
  *
  * @param redditUrl
- * @return {Promise<{audioUrl: string, videoUrl: string}>}
+ * @return {Promise<{audioUrl: string, videoUrl: string, title: *}|{audioUrl: [*], videoUrl: *, title: *}>}
  */
 module.exports.sanitizeUrlFromReddit = async (redditUrl) => {
   try {
+    let isAccessible, audioUrl
     let result = null
     if (await checkRedditUrl(redditUrl)) {
       const urlJson = redditUrl + '.json'
@@ -37,15 +37,28 @@ module.exports.sanitizeUrlFromReddit = async (redditUrl) => {
         url: urlJson,
         responseType: 'json'
       })
-      // Abstract the overly complex reddit json object
+      // Abstracting the overly complex reddit json object
       const narrowedDownData = response.data[0].data.children[0].data
-      if (narrowedDownData.is_reddit_media_domain &&
-        narrowedDownData.is_video &&
-        narrowedDownData.secure_media.reddit_video.is_gif === false) {
-        result = {
-          title: narrowedDownData.title,
-          videoUrl: narrowedDownData.secure_media.reddit_video.fallback_url,
-          audioUrl: narrowedDownData.url + '/DASH_audio.mp4'
+      if (narrowedDownData.is_reddit_media_domain) {
+        if (!narrowedDownData.secure_media.reddit_video.is_gif) {
+          isAccessible = await isUrlAccessible(narrowedDownData.url + '/audio')
+          if (isAccessible) {
+            audioUrl = narrowedDownData.url + '/audio'
+          } else {
+            audioUrl = narrowedDownData.url + '/DASH_audio.mp4'
+          }
+          result = {
+            title: narrowedDownData.title,
+            videoUrl: narrowedDownData.secure_media.reddit_video.fallback_url,
+            // reddit for some reason uses two different nomenclatures for audio so, had to keep it in mind.
+            audioUrl: audioUrl
+          }
+        } else {
+          result = {
+            title: narrowedDownData.title,
+            videoUrl: narrowedDownData.secure_media.reddit_video.fallback_url,
+            audioUrl: ''
+          }
         }
       } else {
         throw new Error(
@@ -54,7 +67,5 @@ module.exports.sanitizeUrlFromReddit = async (redditUrl) => {
       return result
     }
     throw new Error('invalid Reddit url: ' + redditUrl)
-  } catch (err) {
-    console.log(err)
-  }
+  } catch (err) {}
 }
