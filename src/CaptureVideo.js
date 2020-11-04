@@ -18,7 +18,7 @@ const { sanitizeUrlFromReddit } = require('./UrlValidator.js')
  * @param responseType {String}
  * @param video {Boolean}
  * @param audio {Boolean}
- * @return {Promise<void>}
+ * @return {Promise<string>}
  */
 module.exports.downloadVredditVideo =
   async (
@@ -42,7 +42,6 @@ module.exports.downloadVredditVideo =
           sanitizedUrl.videoUrl, title + '_temp' + '.mp4',
           outputPath)
       }
-
       if (sanitizedUrl.audioUrl !== '') {
         if (audio) {
           redditAudio = captureMediaStream(
@@ -55,8 +54,10 @@ module.exports.downloadVredditVideo =
             toSnakeCase(sanitizedUrl.title) + '.mp4')
         }
       }
+      return 'success'
     } catch (err) {
       console.log(err)
+      return err
     }
   }
 
@@ -96,10 +97,9 @@ const captureMediaStream =
               }
             })
           })
-        } else {
-          throw new Error('error while downloading from' + url + 'Error Code:' +
-            response.data.statusCode)
         }
-      }).catch(console.log)
+      }).catch((err) => {
+        Error('error while downloading from' + url + 'Error ' + err)
+      })
     })
   }

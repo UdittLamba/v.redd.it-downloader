@@ -108,6 +108,6 @@ dist
 
 # Do not like uploading lock files.
 package-lock.json
-tests/
 *.mp4
 *.mp3
+!/test/captureVideo.test.js

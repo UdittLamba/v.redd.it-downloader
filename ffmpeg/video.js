@@ -277,7 +277,7 @@ module.exports = function (filePath, settings, infoConfiguration, infoFile) {
       margin_nord: null, // Margin nord
       margin_sud: null, // Margin sud
       margin_east: null, // Margin east
-      margin_west: null, // Margin west
+      margin_west: null // Margin west
     }
 
     // Check if watermark exists
@@ -383,7 +383,7 @@ module.exports = function (filePath, settings, infoConfiguration, infoFile) {
       // Set the new option
       options.video.watermark = {
         path: watermarkPath,
-        overlay: overlay,
+        overlay: overlay
       }
       return this
     } else if (arguments[2] !== undefined && arguments[2] === true) {
@@ -578,7 +578,7 @@ module.exports = function (filePath, settings, infoConfiguration, infoFile) {
     return {
       width: width,
       height: height,
-      aspect: aspect,
+      aspect: aspect
     }
   }
 
@@ -692,7 +692,7 @@ module.exports = function (filePath, settings, infoConfiguration, infoFile) {
       keep_pixel_aspect_ratio: true, // Mantain the original pixel video aspect ratio
       keep_aspect_ratio: true, // Mantain the original aspect ratio
       padding_color: 'black', // Padding color
-      file_name: null, // File name
+      file_name: null // File name
     }
 
     // Scan all arguments

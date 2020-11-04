@@ -1,6 +1,6 @@
 const fs = require('fs')
 const axios = require('axios')
-const Ffmpeg = require('./ffmpeg/ffmpeg')
+const Ffmpeg = require('../ffmpeg/ffmpeg')
 /**
  * @param string {string}
  * @return {string}
@@ -28,6 +28,7 @@ module.exports.mergeAudioVideo = async (videoPath, audioPath, outputPath) => {
         if (err) throw err
         console.log(audioPath + ' was deleted')
       })
+      return 'success'
     } else {
       console.log('Error: ' + err)
     }
