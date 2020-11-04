@@ -5,7 +5,6 @@ node_js:
 script:
   - npm install
   - mkdir -p test/vid
-  - mkdir
   - npm test
 after_success:
   - npm run report-coverage
