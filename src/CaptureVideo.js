@@ -90,10 +90,8 @@ const captureMediaStream =
             fs.writeFile(outputPath + outputFileName, buff, (err) => {
               if (err) {
                 reject(err)
-                console.log('Error while writing file :' + outputFileName)
               } else {
                 resolve(outputPath + outputFileName)
-                console.log('File created at: ' + outputPath + outputFileName)
               }
             })
           })

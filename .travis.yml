@@ -3,6 +3,7 @@ language: node_js
 node_js:
   - stable
 script:
+  - npm install
   - mkdir -p test/vid
   - mkdir
   - npm test

@@ -15,18 +15,15 @@ module.exports.toSnakeCase = string => {
 module.exports.mergeAudioVideo = async (videoPath, audioPath, outputPath) => {
   await Ffmpeg(videoPath, async (err, video) => {
     if (!err) {
-      console.log('merging...')
       video.addCommand('-i', videoPath)
       video.addCommand('-i', audioPath)
       video.addCommand('-c', 'copy')
       await video.save(outputPath)
       fs.unlink(videoPath, (err) => {
         if (err) throw err
-        console.log(videoPath + ' was deleted')
       })
       fs.unlink(audioPath, (err) => {
         if (err) throw err
-        console.log(audioPath + ' was deleted')
       })
       return 'success'
     } else {
