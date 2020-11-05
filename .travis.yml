@@ -1,0 +1,10 @@
+sudo: false
+language: node_js
+node_js:
+  - stable
+script:
+  - npm install
+  - mkdir -p test/vid
+  - npm test
+after_success:
+  - npm run report-coverage
